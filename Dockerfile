@@ -9,7 +9,10 @@ ARG HF_TOKEN=""
 RUN git clone https://github.com/rgthree/rgthree-comfy /comfyui/custom_nodes/rgthree-comfy && cd /comfyui/custom_nodes/rgthree-comfy && (git checkout c5ffa43de4ddb17244626a65a30700a05dd6b67d 2>/dev/null || (git fetch origin c5ffa43de4ddb17244626a65a30700a05dd6b67d --depth=1 && git checkout c5ffa43de4ddb17244626a65a30700a05dd6b67d) || echo "WARN: commit c5ffa43de4ddb17244626a65a30700a05dd6b67d unreachable in https://github.com/rgthree/rgthree-comfy, falling back to default branch HEAD")
 RUN comfy node install --exit-on-fail comfyui-impact-subpack@1.3.5 --mode remote || (echo "WARN: comfyui-impact-subpack@1.3.5 unavailable in registry, falling back to latest" >&2 && comfy node install --exit-on-fail comfyui-impact-subpack --mode remote)
 RUN comfy node install --exit-on-fail comfyui-impact-pack@8.28.1 || (echo "WARN: comfyui-impact-pack@8.28.1 unavailable in registry, falling back to latest" >&2 && comfy node install --exit-on-fail comfyui-impact-pack)
-RUN git clone https://github.com/MONKEYFOREVER2/ComfyUI-ChromaGrade /comfyui/custom_nodes/ComfyUI-ChromaGrade
+# ComfyUI-ChromaGrade n'est plus disponible sur GitHub (repo introuvable) —
+# embarqué directement depuis la copie locale de Kevin (custom_nodes/ à la
+# racine de ce repo) au lieu d'un git clone externe cassé.
+COPY custom_nodes/ComfyUI-ChromaGrade /comfyui/custom_nodes/ComfyUI-ChromaGrade
 
 # download models into comfyui
 RUN BACKOFFS="10 20 30 60 90" && for i in 1 2 3 4 5; do HF_TOKEN=$HF_TOKEN comfy model download --url 'https://huggingface.co/Abiray/Krea-2-Turbo-FP8-NVFP4/resolve/main/krea2_turbo_nvfp4.safetensors' --relative-path models/diffusion_models --filename 'krea2_turbo_nvfp4.safetensors' && break; if [ $i -eq 5 ]; then echo "model-download failed after 5 attempts" >&2; exit 1; fi; SLEEP=$(echo $BACKOFFS | cut -d ' ' -f $i) && echo "model-download attempt $i failed; retrying in $SLEEP seconds" >&2; sleep $SLEEP; done
