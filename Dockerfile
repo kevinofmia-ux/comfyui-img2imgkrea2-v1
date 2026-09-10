@@ -9,6 +9,14 @@ ARG HF_TOKEN=""
 RUN git clone https://github.com/rgthree/rgthree-comfy /comfyui/custom_nodes/rgthree-comfy && cd /comfyui/custom_nodes/rgthree-comfy && (git checkout c5ffa43de4ddb17244626a65a30700a05dd6b67d 2>/dev/null || (git fetch origin c5ffa43de4ddb17244626a65a30700a05dd6b67d --depth=1 && git checkout c5ffa43de4ddb17244626a65a30700a05dd6b67d) || echo "WARN: commit c5ffa43de4ddb17244626a65a30700a05dd6b67d unreachable in https://github.com/rgthree/rgthree-comfy, falling back to default branch HEAD")
 RUN comfy node install --exit-on-fail comfyui-impact-subpack@1.3.5 --mode remote || (echo "WARN: comfyui-impact-subpack@1.3.5 unavailable in registry, falling back to latest" >&2 && comfy node install --exit-on-fail comfyui-impact-subpack --mode remote)
 RUN comfy node install --exit-on-fail comfyui-impact-pack@8.28.1 || (echo "WARN: comfyui-impact-pack@8.28.1 unavailable in registry, falling back to latest" >&2 && comfy node install --exit-on-fail comfyui-impact-pack)
+# `comfy node install` pulls each node's Python deps into /comfyui/.venv, mais
+# ComfyUI tourne réellement depuis /opt/venv sur cette image de base (voir web
+# root dans les logs runtime) — les deux venvs divergent, donc cv2 (et le reste)
+# manquaient au runtime alors qu'ils s'étaient bien installés au build. On les
+# réinstalle explicitement dans le vrai venv d'exécution, à partir des
+# requirements.txt propres à chaque package (pas de liste de deps à la main).
+RUN /opt/venv/bin/pip install --no-cache-dir -r /comfyui/custom_nodes/comfyui-impact-pack/requirements.txt
+RUN /opt/venv/bin/pip install --no-cache-dir -r /comfyui/custom_nodes/comfyui-impact-subpack/requirements.txt
 # ComfyUI-ChromaGrade n'est plus disponible sur GitHub (repo introuvable) —
 # embarqué directement depuis la copie locale de Kevin (custom_nodes/ à la
 # racine de ce repo) au lieu d'un git clone externe cassé.
