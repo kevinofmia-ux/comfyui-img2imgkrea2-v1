@@ -41,3 +41,10 @@ RUN BACKOFFS="10 20 30 60 90" && for i in 1 2 3 4 5; do HF_TOKEN=$HF_TOKEN comfy
 
 # user-provided inputs override the auto-generated placeholders above.
 RUN wget --progress=dot:giga -O '/comfyui/input/Z-Image-H_00622_.png' "https://cool-anteater-319.convex.cloud/api/storage/6a5541e1-86d9-451e-8e6d-2f7268e202fb"
+
+# Mappe le Network Volume (/runpod-volume, contient les LoRAs) dans les dossiers
+# modèles de ComfyUI — sans ce fichier, ComfyUI ignore le volume même attaché
+# (root-caused sur le repo MiniMax H3 : voir extra_model_paths.yaml). Les LoRAs
+# Sofia/RealisticSnapshot ont peut-être été silencieusement ignorées jusqu'ici
+# pour cette même raison — à vérifier visuellement une fois l'endpoint refait.
+COPY extra_model_paths.yaml /comfyui/extra_model_paths.yaml

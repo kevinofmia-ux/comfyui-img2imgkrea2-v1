@@ -1,0 +1,16 @@
+# Sans ce fichier, ComfyUI ne regarde que dans /comfyui/models/ — il ignore le
+# Network Volume RunPod monté à /runpod-volume, même si le volume est bien
+# attaché à l'endpoint. Confirmé via le propre script de diagnostic de
+# runpod-workers/worker-comfyui (src/network_volume.py) : c'est la cause n°1
+# documentée de "model not in list" avec un network volume attaché.
+comfyui:
+  base_path: /runpod-volume/
+  diffusion_models: models/diffusion_models/
+  text_encoders: models/text_encoders/
+  vae: models/vae/
+  loras: models/loras/
+  checkpoints: models/checkpoints/
+  upscale_models: models/upscale_models/
+  controlnet: models/controlnet/
+  clip_vision: models/clip_vision/
+  embeddings: models/embeddings/
